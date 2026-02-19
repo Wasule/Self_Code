@@ -1,0 +1,33 @@
+# Data files
+data/cifar-10-python.tar.gz
+data/cifar-10-batches-py/
+adv_output/
+adversarial_detection/adv_output/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+.venv
+
+# Models
+*.pth
+*.pt
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
