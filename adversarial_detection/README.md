@@ -1,65 +1,96 @@
-# Adversarial Attack Detection in Image Classification
+# Adversarial Detection Project
 
-This project demonstrates how to train a baseline CNN on CIFAR-10 and then build a detector to distinguish between clean images and adversarially perturbed images.
+A comprehensive project for detecting adversarial attacks in image classification systems using deep learning.
 
-## Environment Setup
+## What is This Project About?
 
-1. Create and activate a virtual environment, then install dependencies:
+Adversarial attacks are carefully crafted perturbations added to images that can fool machine learning models into making incorrect predictions while remaining imperceptible to human eyes. This project addresses the critical problem of **detecting whether an image has been adversarially attacked** rather than trying to make models robust against attacks.
 
-```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install -r adversarial_detection/requirements.txt
+The system trains two complementary models:
+1. **Baseline CNN** - A standard image classifier trained on clean CIFAR-10 images
+2. **Adversarial Detector** - A specialized detector that learns to distinguish between clean and adversarially perturbed images
+
+## Why Was This Developed?
+
+### The Problem
+- Deep learning models are vulnerable to adversarial attacks
+- Adversarial perturbations are often imperceptible to humans but fool AI systems
+- Defense mechanisms have limitations and can be computationally expensive
+- There's a need for alternative approaches to handle adversarial robustness
+
+### The Solution
+Rather than making models inherently robust (which is difficult), this project implements a **detection-based defense** approach:
+- Deploy a lightweight detector alongside the classifier
+- Identify suspicious inputs before they reach the main model
+- Provide an additional security layer in critical applications
+- Enable safe fallback mechanisms when poisoned inputs are detected
+
+## How Does It Work?
+
+### Architecture Overview
+
+```
+Clean Images / Adversarial Images
+            ↓
+    Feature Extraction (CNN)
+            ↓
+    Adversarial Detector Network
+            ↓
+    Classification: [Clean / Adversarial]
 ```
 
-2. Files of interest:
+### Process Flow
 
-- Baseline training: [adversarial_detection/train.py](adversarial_detection/train.py)
-- Generate adversarial examples & train detector: [adversarial_detection/detect.py](adversarial_detection/detect.py)
-- Adversarial generator & tester: [adversarial_detection/generate_attack.py](adversarial_detection/generate_attack.py)
+1. **Training Phase**
+   - Train baseline CNN on clean CIFAR-10 images
+   - Generate adversarial examples using FGSM/PGD attacks with varying epsilon values
+   - Train detector network to differentiate between clean and attacked images
 
-## Quick Run
+2. **Attack Generation**
+   - FGSM (Fast Gradient Sign Method) - fast, single-step perturbation
+   - PGD (Projected Gradient Descent) - stronger, iterative attack method
+   - Epsilon values control perturbation magnitude (0.001 to 0.03 range)
 
-1. Train baseline model:
+3. **Detection Mechanism**
+   - Detector analyzes image features and pixel patterns
+   - Learns subtle differences between clean and adversarial examples
+   - Outputs confidence scores for classification
 
-```bash
-python3 adversarial_detection/train.py
-```
+### Key Components
 
-This saves `baseline_cnn.pth`.
+- **Baseline Model**: Simple CNN architecture trained on clean images
+- **Detector Model**: Neural network trained on mixed clean/adversarial dataset
+- **Attack Generator**: Creates adversarial examples with configurable parameters
+- **Evaluator**: Measures detection accuracy and false positive/negative rates
 
-2. Train detector (generates adversarial examples and trains detector):
+## Overview
 
-```bash
-python3 adversarial_detection/detect.py
-```
+This repository contains code for training baseline CNN models and building detectors to identify adversarially perturbed images.
 
-This saves `detector.pth`.
-
-3. Generate a single adversarial example and run the detector:
-
-```bash
-python3 adversarial_detection/generate_attack.py --attack fgsm --eps 0.01
-```
-
-Output images are saved to `adv_output/` (clean and adversarial images). The script will also print the detector's prediction.
-
-## Generate Multiple Adversarial Samples
-
-To produce multiple adversarial examples with different perturbation sizes (`eps`) and save them into separate folders, run the following shell loop from the repository root:
+## Quick Start
 
 ```bash
-for eps in 0.001 0.005 0.01 0.03; do
-  outdir=adversarial_detection/adv_output/eps_${eps}
-  python3 adversarial_detection/generate_attack.py --attack fgsm --eps ${eps} --outdir ${outdir}
-done
+# Install dependencies
+pip install -r requirements.txt
+
+# Train baseline model
+python3 train.py
+
+# Train detector
+python3 detect.py
+
+# Generate adversarial examples
+python3 generate_attack.py --attack fgsm --eps 0.01
 ```
 
-After the loop completes you will have folders under `adversarial_detection/adv_output/` containing `clean.png` and `adversarial_fgsm_eps{eps}.png` for each `eps` value. Use these images to visually inspect attacks or to evaluate detector performance.
+## Files
 
-## Notes
+- `train.py` - Train baseline CNN model
+- `detect.py` - Train adversarial detector
+- `generate_attack.py` - Generate adversarial examples
+- `evaluate_detector.py` - Evaluate detector performance
+- `app.py` - Application interface
 
-- The project uses `torchattacks` for FGSM/PGD implementations. See `adversarial_detection/requirements.txt`.
-- Models in the repo are simple and intended for demonstration; you can replace `baseline_cnn.pth` with your own stronger classifier if needed.
+## Requirements
 
-Feel free to open an issue or submit a PR with improvements.
+See `requirements.txt` for dependencies.
